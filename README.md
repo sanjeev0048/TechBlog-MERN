@@ -246,3 +246,4 @@ This verifies:
 - **Image Storage:** Uploaded images are stored on the local filesystem under `server/uploads`. In a large multi-instance containerized cloud deployment (e.g. AWS ECS / Kubernetes), this should be pointed to an S3 bucket or Cloudinary CDN.
 - **Search Engine:** Text queries currently use MongoDB case-insensitive regex matching with text indexes. For multi-million article datasets, an external inverted index (Elasticsearch / Algolia) is recommended.
 "# TechBlog-MERN" 
+"# TechBlog-MERN" 
