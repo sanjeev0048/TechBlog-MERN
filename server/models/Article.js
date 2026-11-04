@@ -37,7 +37,8 @@ const articleSchema = new mongoose.Schema(
     author: {
       name: { type: String, default: 'Editorial Staff' },
       role: { type: String, default: 'Author' },
-      avatar: { type: String, default: '' }
+      avatar: { type: String, default: '' },
+      bio: { type: String, default: '' },
     },
     publishedAt: {
       type: String,
