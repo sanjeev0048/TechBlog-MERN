@@ -1,20 +1,25 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BlogProvider } from './context/BlogContext';
 
+// Layout components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
+// Public pages
 import Home from './pages/Home';
 import BlogListing from './pages/BlogListing';
 import BlogDetail from './pages/BlogDetail';
+import AuthorProfile from './pages/AuthorProfile';
 
+// Admin pages
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBlogs from './pages/admin/AdminBlogs';
+import AdminBlogEditor from './pages/admin/AdminBlogEditor';
 import AdminCategories from './pages/admin/AdminCategories';
-import AuthorProfile from './pages/AuthorProfile';
 
 export default function App() {
   return (
@@ -23,14 +28,18 @@ export default function App() {
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col justify-between selection:bg-blue-100 selection:text-blue-900">
           <div>
             <Header />
+
             <main>
               <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/blogs" element={<BlogListing />} />
                 <Route path="/blogs/:slug" element={<BlogDetail />} />
-          <Route path="/author/:slug" element={<AuthorProfile />} />
+                <Route path="/author/:slug" element={<AuthorProfile />} />
 
+                {/* Admin routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
+
                 <Route
                   path="/admin/dashboard"
                   element={
@@ -39,6 +48,7 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/admin/blogs"
                   element={
@@ -47,6 +57,7 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/admin/blogs/new"
                   element={
@@ -55,6 +66,7 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/admin/blogs/edit/:id"
                   element={
@@ -63,6 +75,7 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/admin/categories"
                   element={
@@ -72,10 +85,15 @@ export default function App() {
                   }
                 />
 
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Fallback route */}
+                <Route
+                  path="*"
+                  element={<Navigate to="/" replace />}
+                />
               </Routes>
             </main>
           </div>
+
           <Footer />
         </div>
       </BrowserRouter>
