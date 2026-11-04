@@ -14,7 +14,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBlogs from './pages/admin/AdminBlogs';
 import AdminBlogEditor from './pages/admin/AdminBlogEditor';
-import AdminCategories from './pages/admin/AdminCategories';
+import AuthorProfile from './pages/AuthorProfile';
 
 export default function App() {
   return (
