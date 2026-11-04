@@ -16,7 +16,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
 
-const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Render, Vercel) for correct client IP & secure cookies
 const PORT = process.env.PORT || 5000;
 
 // Connect to MongoDB
