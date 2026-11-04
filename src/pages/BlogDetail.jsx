@@ -2,12 +2,14 @@ import React, { useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, ChevronRight, AlertCircle, Tag } from 'lucide-react';
 import { useBlog } from '../context/BlogContext';
-import { parseHeadings } from '../utils/helpers';
+import { parseHeadings, slugify } from '../utils/helpers';
 import Badge from '../components/common/Badge';
 import ArticleCard from '../components/blog/ArticleCard';
 import TableOfContents from '../components/blog/TableOfContents';
 import ShareButtons from '../components/blog/ShareButtons';
 import { getAssetUrl } from '../services/api';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -124,65 +126,112 @@ const BlogDetail = () => {
             </p>
           )}
 
-          <div className="space-y-5">
-            {article.content.split('\n\n').map((block, idx) => {
-              const text = block.trim();
-
-              if (text.startsWith('## ')) {
-                const title = text.replace(/^##\s+/, '');
-                return (
-                  <h2
-                    key={idx}
-                    id={title.toLowerCase().replace(/[^\w\-]+/g, '-')}
-                    className="text-2xl font-bold text-slate-900 pt-4 mb-2 border-b border-slate-100 pb-2 scroll-mt-20"
+          <div className="prose prose-slate max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h2: ({ children }) => {
+                  const text = typeof children === 'string' ? children : String(children);
+                  const id = slugify(text);
+                  return (
+                    <h2
+                      id={id}
+                      className="text-2xl font-bold text-slate-900 pt-4 mb-2 border-b border-slate-100 pb-2 scroll-mt-20"
+                    >
+                      {children}
+                    </h2>
+                  );
+                },
+                h3: ({ children }) => {
+                  const text = typeof children === 'string' ? children : String(children);
+                  const id = slugify(text);
+                  return (
+                    <h3
+                      id={id}
+                      className="text-xl font-semibold text-slate-900 pt-3 mb-2 scroll-mt-20"
+                    >
+                      {children}
+                    </h3>
+                  );
+                },
+                h4: ({ children }) => (
+                  <h4 className="text-lg font-semibold text-slate-900 pt-2 mb-1">{children}</h4>
+                ),
+                p: ({ children }) => (
+                  <p className="text-slate-700 leading-relaxed mb-4">{children}</p>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-bold text-slate-900">{children}</strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic text-slate-600">{children}</em>
+                ),
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    className="text-blue-600 underline hover:text-blue-800 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {title}
-                  </h2>
-                );
-              }
-
-              if (text.startsWith('### ')) {
-                const title = text.replace(/^###\s+/, '');
-                return (
-                  <h3
-                    key={idx}
-                    id={title.toLowerCase().replace(/[^\w\-]+/g, '-')}
-                    className="text-xl font-semibold text-slate-900 pt-3 mb-2 scroll-mt-20"
-                  >
-                    {title}
-                  </h3>
-                );
-              }
-
-              if (text.startsWith('```')) {
-                const code = text.replace(/^```[a-z]*\n?/, '').replace(/```$/, '');
-                return (
-                  <div
-                    key={idx}
-                    className="my-4 rounded-xl overflow-x-auto border border-slate-800 bg-slate-900 text-slate-100 p-4 text-xs font-mono shadow-inner"
-                  >
-                    <pre><code>{code}</code></pre>
+                    {children}
+                  </a>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 space-y-1.5 text-slate-700 mb-4">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 space-y-1.5 text-slate-700 mb-4">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-slate-700 leading-relaxed">{children}</li>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50/50 rounded-r-lg text-slate-600 italic">
+                    {children}
+                  </blockquote>
+                ),
+                code: ({ inline, className, children }) => {
+                  if (inline) {
+                    return (
+                      <code className="bg-slate-100 text-rose-600 px-1.5 py-0.5 rounded text-sm font-mono">
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <div className="my-4 rounded-xl overflow-x-auto border border-slate-800 bg-slate-900 text-slate-100 p-4 text-xs font-mono shadow-inner">
+                      <pre><code className={className}>{children}</code></pre>
+                    </div>
+                  );
+                },
+                pre: ({ children }) => <>{children}</>,
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full border border-slate-200 text-sm">{children}</table>
                   </div>
-                );
-              }
-
-              if (text.startsWith('- ') || text.startsWith('* ')) {
-                const listItems = text.split('\n').filter(Boolean);
-                return (
-                  <ul key={idx} className="list-disc pl-5 space-y-1.5 text-slate-700">
-                    {listItems.map((li, i) => (
-                      <li key={i}>{li.replace(/^[-*]\s+/, '')}</li>
-                    ))}
-                  </ul>
-                );
-              }
-
-              return (
-                <p key={idx} className="text-slate-700 leading-relaxed">
-                  {text}
-                </p>
-              );
-            })}
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-slate-100 text-slate-700 font-semibold">{children}</thead>
+                ),
+                th: ({ children }) => (
+                  <th className="border border-slate-200 px-3 py-2 text-left">{children}</th>
+                ),
+                td: ({ children }) => (
+                  <td className="border border-slate-200 px-3 py-2">{children}</td>
+                ),
+                hr: () => <hr className="my-6 border-slate-200" />,
+                img: ({ src, alt }) => (
+                  <img
+                    src={src}
+                    alt={alt || ''}
+                    className="rounded-lg my-4 max-w-full h-auto"
+                    loading="lazy"
+                  />
+                ),
+              }}
+            >
+              {article.content}
+            </ReactMarkdown>
           </div>
 
           {article.tags?.length > 0 && (
