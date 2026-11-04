@@ -64,6 +64,7 @@ const AdminLogin = () => {
             </label>
             <input
               type="email"
+              autoComplete="username"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -77,6 +78,7 @@ const AdminLogin = () => {
             </label>
             <input
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

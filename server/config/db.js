@@ -1,7 +1,18 @@
 import mongoose from 'mongoose';
 
 export async function connectDB() {
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/techpulse_db';
+  // Resolve MongoDB connection string
+  const env = process.env.NODE_ENV || 'development';
+  const uriFromEnv =
+    process.env.MONGODB_URI ||
+    process.env.ATLAS_URI ||
+    process.env.MONGODB_URL;
+
+  if (env === 'production' && !uriFromEnv) {
+    throw new Error('MongoDB connection string not configured. Set MONGODB_URI, ATLAS_URI, or MONGODB_URL.');
+  }
+
+  const uri = uriFromEnv || 'mongodb://localhost:27017/techpulse_db';
 
   try {
     const conn = await mongoose.connect(uri);
@@ -9,7 +20,8 @@ export async function connectDB() {
     return conn;
   } catch (err) {
     console.error(`MongoDB connection error: ${err.message}`);
-    process.exit(1);
+    // On production we don't want the process to exit silently; rethrow to let the caller handle it
+    throw err;
   }
 }
 
