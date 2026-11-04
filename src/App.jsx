@@ -28,6 +28,7 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/blogs" element={<BlogListing />} />
                 <Route path="/blogs/:slug" element={<BlogDetail />} />
+          <Route path="/author/:slug" element={<AuthorProfile />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route

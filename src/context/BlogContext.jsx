@@ -27,6 +27,13 @@ export function normalizeArticle(raw) {
         avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80'
       };
 
+  // Normalize admin role/name to unified TechPulse author
+  if (authorObj.role && authorObj.role.toLowerCase() === 'admin') {
+    authorObj.name = 'TechPulse Team';
+    authorObj.role = 'Editorial Team';
+  }
+
+
   const statusCapitalized = raw.status
     ? raw.status.charAt(0).toUpperCase() + raw.status.slice(1).toLowerCase()
     : 'Published';

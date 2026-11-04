@@ -28,8 +28,9 @@ const BlogDetail = () => {
 
   const related = useMemo(() => {
     if (!article) return [];
+    // Show other published articles by the same author
     return articles
-      .filter(a => a.id !== article.id && a.category === article.category && a.status === 'Published')
+      .filter(a => a.id !== article.id && a.author?.name === article.author?.name && a.status === 'Published')
       .slice(0, 3);
   }, [articles, article]);
 
@@ -86,8 +87,11 @@ const BlogDetail = () => {
               }}
             />
             <div>
-              <div className="font-semibold text-slate-900">{article.author?.name}</div>
+              <div className="font-semibold text-slate-900"><Link to={`/author/${slugify(article.author?.name || '')}`} className="font-semibold text-slate-900 hover:underline">{article.author?.name}</Link></div>
               <div className="text-xs text-slate-500">{article.author?.role}</div>
+{article.author?.bio && (
+  <p className="text-sm text-slate-600 mt-1">{article.author?.bio}</p>
+)}
             </div>
           </div>
           <div className="flex items-center space-x-4 text-xs sm:text-sm text-slate-400">
@@ -259,7 +263,7 @@ const BlogDetail = () => {
               }}
             />
             <div>
-              <h4 className="font-bold text-slate-900">{article.author?.name}</h4>
+              <h4 className="font-bold text-slate-900"><Link to={`/author/${slugify(article.author?.name || '')}`} className="font-semibold text-slate-900 hover:underline">{article.author?.name}</Link></h4>
               <p className="text-xs text-slate-500 mb-1">{article.author?.role}</p>
               <p className="text-xs text-slate-600">
                 Staff writer covering software architecture, cloud platforms, and distributed systems.
