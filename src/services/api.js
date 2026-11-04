@@ -37,8 +37,17 @@ async function request(endpoint, options = {}) {
   }
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Request failed with status ${res.status}`);
+    let message = `Request failed with status ${res.status}`;
+    try {
+      const errData = await res.json();
+      if (errData?.message) message = errData.message;
+    } catch (_) {
+      const text = await res.text();
+      if (text) message = text;
+    }
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
   }
 
   return res.json();

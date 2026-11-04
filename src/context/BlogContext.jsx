@@ -165,20 +165,8 @@ export const BlogProvider = ({ children }) => {
       });
       return created;
     } catch (apiErr) {
-      console.warn('API createBlog failed, falling back to local storage:', apiErr.message);
-      const local = normalizeArticle({
-        ...data,
-        id: String(Date.now()),
-        publishedAt: new Date().toISOString().split('T')[0],
-        views: 0
-      });
-      setArticles(prev => {
-        const updated = local.isFeatured ? prev.map(a => ({ ...a, isFeatured: false })) : prev;
-        const nextList = [local, ...updated];
-        storageService.saveArticles(nextList);
-        return nextList;
-      });
-      return local;
+      console.error('Failed to create article:', apiErr);
+      throw apiErr;
     } finally {
       setIsLoading(false);
     }
@@ -203,24 +191,8 @@ export const BlogProvider = ({ children }) => {
       }));
       return updatedArticle;
     } catch (apiErr) {
-      console.warn('API updateBlog failed, applying locally:', apiErr.message);
-      setArticles(prev => {
-        const nextList = prev.map(item => {
-          if (item.id === id || item._id === id) {
-            const next = { ...item, ...updates };
-            if (updates.content) {
-              next.readTime = calculateReadTime(updates.content);
-            }
-            return next;
-          }
-          if (updates.isFeatured) {
-            return { ...item, isFeatured: false };
-          }
-          return item;
-        });
-        storageService.saveArticles(nextList);
-        return nextList;
-      });
+      console.error('Failed to update article:', apiErr);
+      throw apiErr;
     } finally {
       setIsLoading(false);
     }
@@ -295,19 +267,15 @@ export const BlogProvider = ({ children }) => {
   const loginAdmin = useCallback(async (email, password) => {
     try {
       const res = await api.login({ email, password });
+      // api.login stores the JWT in localStorage
       setIsAdminLoggedIn(true);
       setCurrentUser(res.user);
       storageService.saveAdminAuth(true);
-      // Immediately refresh articles with admin permissions
+      // Refresh articles with admin privileges
       refreshData();
       return { success: true };
     } catch (err) {
-      // Local fallback for quick demo evaluation if server offline
-      if (email === "admin@techpulse.com" && password === "admin123") {
-        setIsAdminLoggedIn(true);
-        storageService.saveAdminAuth(true);
-        return { success: true };
-      }
+      // No demo fallback – propagate real error
       return { success: false, message: err.message || 'Invalid email or password.' };
     }
   }, [refreshData]);
